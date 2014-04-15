@@ -18,7 +18,7 @@ RUN echo deb http://dl.hhvm.com/ubuntu precise main | sudo tee /etc/apt/sources.
 
 RUN apt-get update
 RUN apt-get install -y php5-cli php5-fpm php5-mysql php5-pgsql php5-sqlite php5-curl\
-		       php5-gd php5-mcrypt php5-intl php5-imap php5-tidy
+		       php5-gd php5-mcrypt php5-intl php5-imap php5-tidy git php5-dev
 
 RUN sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php5/fpm/php.ini
 RUN sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php5/cli/php.ini
@@ -27,11 +27,23 @@ RUN apt-get install -y nginx
 RUN apt-get install -y hhvm
 RUN apt-get install -y redis-server memcached
 
+RUN cd /tmp/ && git clone https://github.com/php/pecl-tools-stomp.git && cd pecl-tools-stomp && phpize && ./configure && make && make install
+
+RUN cd /tmp/ && git clone https://github.com/nicolasff/phpredis.git && cd phpredis && phpize && ./configure && make && make install
+
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf
 RUN sed -i -e "s/;daemonize\s*=\s*yes/daemonize = no/g" /etc/php5/fpm/php-fpm.conf
 RUN sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php5/fpm/php.ini
 
 RUN sed -i.bak "s/daemonize yes/daemonize no/g" /etc/redis/redis.conf
+
+ADD docker/stomp.ini   /etc/php5/mods-available/
+RUN ln -s /etc/php5/mods-available/stomp.ini /etc/php5/cli/conf.d/20-stomp.ini
+RUN ln -s /etc/php5/mods-available/stomp.ini /etc/php5/fpm/conf.d/20-stomp.ini
+
+ADD docker/phpredis.ini   /etc/php5/mods-available/
+RUN ln -s /etc/php5/mods-available/phpredis.ini /etc/php5/cli/conf.d/20-phpredis.ini
+RUN ln -s /etc/php5/mods-available/phpredis.ini /etc/php5/fpm/conf.d/20-phpredis.ini
 
 RUN mkdir           /var/www
 ADD .               /var/www
