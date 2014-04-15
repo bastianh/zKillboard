@@ -17,8 +17,7 @@ RUN wget -O - http://dl.hhvm.com/conf/hhvm.gpg.key | sudo apt-key add -
 RUN echo deb http://dl.hhvm.com/ubuntu precise main | sudo tee /etc/apt/sources.list.d/hhvm.list
 
 RUN apt-get update
-RUN apt-get install -y php5-cli php5-fpm php5-mysql php5-pgsql php5-sqlite php5-curl\
-		       php5-gd php5-mcrypt php5-intl php5-imap php5-tidy git php5-dev
+RUN apt-get install -y php5-cli php5-fpm php5-mysql php5-curl php5-gd php5-mcrypt php5-intl php5-tidy git php5-dev
 
 RUN sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php5/fpm/php.ini
 RUN sed -i "s/;date.timezone =.*/date.timezone = UTC/" /etc/php5/cli/php.ini
@@ -44,6 +43,9 @@ RUN ln -s /etc/php5/mods-available/stomp.ini /etc/php5/fpm/conf.d/20-stomp.ini
 ADD docker/phpredis.ini   /etc/php5/mods-available/
 RUN ln -s /etc/php5/mods-available/phpredis.ini /etc/php5/cli/conf.d/20-phpredis.ini
 RUN ln -s /etc/php5/mods-available/phpredis.ini /etc/php5/fpm/conf.d/20-phpredis.ini
+
+# pheal cache
+VOLUME ["/var/lib/pheal"]
 
 RUN mkdir           /var/www
 ADD .               /var/www
